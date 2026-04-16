@@ -5,14 +5,16 @@ pipeline {
     registry = "firstcicd"
     registryCredential = 'dockerhub'
   }
-}
 
-//   stages {
-//     stage('Checkout') {
-//       steps {
-//          git branch: 'main', changelog: false, credentialsId: 'github', poll: false, url: 'https://github.com/nmit-1NT23CS191/AIML-game.git'
-//       }
-//     }
+
+  stages {
+    stage('Checkout') {
+      steps {
+         git branch: 'main', changelog: false, credentialsId: 'github', poll: false, url: 'https://github.com/nmit-1NT23CS191/AIML-game.git'
+      }
+    }
+  }
+}
 
 //     stage('Stage I: Build') {
 //       steps {
