@@ -9,7 +9,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git branch: 'main', credentialsId: 'github', url: 'https://github.com/nmit-1NT23CS191/AIML-game.git'
+         git branch: 'main', changelog: false, credentialsId: 'github', poll: false, url: 'https://github.com/nmit-1NT23CS191/AIML-game.git'
       }
     }
 
