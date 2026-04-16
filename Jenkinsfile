@@ -29,15 +29,16 @@ pipeline {
         echo "Code coverage is not applicable for this static HTML/CSS/JS project."
       }
     }
+  
+
+    stage('Stage III: SCA') {
+      steps {
+        echo "Running SCA using Trivy file system scan for dependency and configuration vulnerabilities..."
+        sh "trivy fs --scanners vuln,config . > sca-report.txt || true"
+      }
+    }
   }
 }
-
-//     stage('Stage III: SCA') {
-//       steps {
-//         echo "Running SCA using Trivy file system scan for dependency and configuration vulnerabilities..."
-//         sh "trivy fs --scanners vuln,config . > sca-report.txt || true"
-//       }
-//     }
 
 //     stage('Stage IV: SAST') {
 //       steps {
