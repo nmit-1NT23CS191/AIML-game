@@ -1,0 +1,116 @@
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f0f8ff;
+}
+
+.container {
+    margin-top: 50px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.section {
+    display: block;
+    animation: fadeIn 0.5s;
+}
+
+.section.hidden {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+button {
+    padding: 12px 25px;
+    margin: 10px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+.diff-btn {
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 18px;
+    background-color: #2196F3;
+    width: 150px;
+    margin-bottom: 15px;
+}
+
+.diff-btn:hover {
+    background-color: #0b7dda;
+}
+
+.diff-btn.active {
+    background-color: #ff9800;
+    border: 3px solid #fff;
+}
+
+input {
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    width: 300px;
+    margin: 10px 0;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+h1 {
+    color: #333;
+    font-size: 40px;
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #2196F3;
+    font-size: 24px;
+    margin: 15px 0;
+}
+
+h3 {
+    color: #666;
+    font-size: 18px;
+}
+
+#playerInfo {
+    color: #4CAF50;
+    font-size: 22px;
+}
+
+#stats {
+    color: #ff9800;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#times {
+    color: #2196F3;
+    font-size: 18px;
+}
+
+#winner {
+    color: #f44336;
+    font-size: 24px;
+    font-weight: bold;
+}
