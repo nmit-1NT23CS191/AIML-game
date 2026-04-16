@@ -22,14 +22,15 @@ pipeline {
         sh "test -f index.html && test -f style.css && test -f script.js"
       }
     }
+  
+
+    stage('Stage II: Code Coverage ') {
+      steps {
+        echo "Code coverage is not applicable for this static HTML/CSS/JS project."
+      }
+    }
   }
 }
-
-//     stage('Stage II: Code Coverage ') {
-//       steps {
-//         echo "Code coverage is not applicable for this static HTML/CSS/JS project."
-//       }
-//     }
 
 //     stage('Stage III: SCA') {
 //       steps {
