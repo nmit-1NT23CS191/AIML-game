@@ -13,15 +13,17 @@ pipeline {
          git branch: 'main', changelog: false, credentialsId: 'github', poll: false, url: 'https://github.com/nmit-1NT23CS191/AIML-game.git'
       }
     }
+  
+
+
+    stage('Stage I: Build') {
+      steps {
+        echo "Building static site assets ..."
+        sh "test -f index.html && test -f style.css && test -f script.js"
+      }
+    }
   }
 }
-
-//     stage('Stage I: Build') {
-//       steps {
-//         echo "Building static site assets ..."
-//         sh "test -f index.html && test -f style.css && test -f script.js"
-//       }
-//     }
 
 //     stage('Stage II: Code Coverage ') {
 //       steps {
