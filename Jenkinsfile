@@ -37,17 +37,18 @@ pipeline {
         sh "trivy fs --scanners vuln,config . > sca-report.txt || true"
       }
     }
+  
+
+    stage('Stage IV: SAST') {
+      steps {
+        echo "Running SonarQube analysis ..."
+        withSonarQubeEnv('mysonarqube') {
+          sh "sonar-scanner -Dsonar.projectKey=AIML-game -Dsonar.projectName=AIML-game -Dsonar.sources=. -Dsonar.exclusions=Jenkinsfile"
+        }
+      }
+    }
   }
 }
-
-//     stage('Stage IV: SAST') {
-//       steps {
-//         echo "Running SonarQube analysis ..."
-//         withSonarQubeEnv('mysonarqube') {
-//           sh "sonar-scanner -Dsonar.projectKey=AIML-game -Dsonar.projectName=AIML-game -Dsonar.sources=. -Dsonar.exclusions=Jenkinsfile"
-//         }
-//       }
-//     }
 
 //     stage('Stage V: QualityGates') {
 //       steps {
