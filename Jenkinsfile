@@ -40,11 +40,17 @@ pipeline {
         echo "Generating Python code coverage report for SonarQube..."
         
         sh '''
-        # Install the required Python testing tools using pip3
-        pip3 install pytest pytest-cov
+        # 1. Create a virtual environment named 'myenv'
+        python3 -m venv myenv
         
-        # Run tests and generate a coverage.xml file for SonarQube
-        python3 -m pytest --cov=. --cov-report=xml || true
+        # 2. Activate the virtual environment
+        . myenv/bin/activate
+        
+        # 3. Install the testing tools safely inside the environment
+        pip install pytest pytest-cov
+        
+        # 4. Run tests and generate the coverage.xml file for SonarQube
+        python -m pytest --cov=. --cov-report=xml || true
         '''
       }
     }
