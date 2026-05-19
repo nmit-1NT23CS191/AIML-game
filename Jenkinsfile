@@ -145,9 +145,7 @@ pipeline {
       }
     }
 
-    stage('stage IX: Deploy)'){
-      
-    }
+     
   }
 }
   
