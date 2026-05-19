@@ -21,18 +21,19 @@ MOVEMENT
 
 import tkinter as tk
 from tkinter import messagebox
-import heapq, random, time
+import heapq, time, os
 from typing import List, Tuple, Dict, Optional, Set, Generator
 
 # ── Config ────────────────────────────────────────────────────────────────────
 GRID_ROWS    = 7
-GRID_COLS    = 9
-CELL_SIZE    = 76
+GRID_COLS    = 7
+# Reduced cell size to make the window smaller on screen
+CELL_SIZE    = 60
 MOVE_TIME_S  = 12        # seconds player has to click after correct answer
 SEARCH_STEP_MS = 40      # A* animation speed
 
 START = (0, 0)
-GOAL  = (6, 8)
+GOAL  = (6, 6)
 WALL_PROB = 0.22
 
 Cell = Tuple[int, int]
@@ -41,6 +42,26 @@ DIRS = [(-1,0),(1,0),(0,-1),(0,1)]
 
 def manhattan(a: Cell, b: Cell) -> int:
     return abs(a[0]-b[0]) + abs(a[1]-b[1])
+
+
+# Lightweight, secure helpers to avoid depending on a possibly-shadowed
+# `random` symbol in the environment (some systems have a conflicting
+# module named `random` that makes `random.random()` fail). We use
+# `secrets` which is available in the stdlib and suitable for game
+# randomness here.
+def _rand_real() -> float:
+    # 53 bits of randomness -> float in [0,1)
+    r = int.from_bytes(os.urandom(7), "big") >> 1
+    return r / (1 << 53)
+
+def _rand_int(a: int, b: int) -> int:
+    # simple modulo reduction using 64 bits (sufficient for game use)
+    width = b - a + 1
+    r = int.from_bytes(os.urandom(8), "big")
+    return a + (r % width)
+
+def _rand_choice(seq):
+    return seq[_rand_int(0, len(seq)-1)]
 
 
 # ── Main class ────────────────────────────────────────────────────────────────
@@ -276,9 +297,9 @@ class MazeRace:
     # QUESTIONS & SUBMIT
     # ══════════════════════════════════════════════════════════════════════════
     def _new_question(self):
-        a  = random.randint(1,12)
-        b  = random.randint(1,12)
-        op = random.choice(["+","-","*"])
+        a  = _rand_int(1,12)
+        b  = _rand_int(1,12)
+        op = _rand_choice(["+","-","*"])
         ans = a+b if op=="+" else (a-b if op=="-" else a*b)
         self.current_question = (a,op,b,ans)
         self.q_label.config(text=f"{a} {op} {b} = ?")
@@ -450,7 +471,7 @@ class MazeRace:
     # ══════════════════════════════════════════════════════════════════════════
     def generate_maze(self):
         while True:
-            grid = [[0 if random.random()>WALL_PROB else 1
+            grid = [[0 if _rand_real()>WALL_PROB else 1
                      for _ in range(GRID_COLS)] for _ in range(GRID_ROWS)]
             grid[START[0]][START[1]] = 0
             grid[GOAL[0]][GOAL[1]]   = 0
