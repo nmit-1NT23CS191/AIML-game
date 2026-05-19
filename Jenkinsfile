@@ -54,6 +54,22 @@ pipeline {
         '''
       }
     }
+
+    stage('Stage III: SCA (Trivy)') {
+      steps {
+        echo "Running SCA using Trivy file system scan for dependency and configuration vulnerabilities..."
+        
+        // Run the Trivy scan and output to a text file
+        // The "|| true" ensures the pipeline doesn't fail just because vulnerabilities are found
+        sh "trivy fs --scanners vuln,config . > sca-report.txt || true"
+      }
+      post {
+        always {
+          // This saves the text file to your Jenkins build page so you can download it
+          archiveArtifacts artifacts: 'sca-report.txt', allowEmptyArchive: true
+        }
+      }
+    }
   }
 }
   
