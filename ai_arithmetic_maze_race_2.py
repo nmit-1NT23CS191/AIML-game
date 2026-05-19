@@ -28,7 +28,7 @@ from typing import List, Tuple, Dict, Optional, Set, Generator
 GRID_ROWS    = 7
 GRID_COLS    = 7
 # Reduced cell size to make the window smaller on screen
-CELL_SIZE    = 60
+CELL_SIZE    = 50
 MOVE_TIME_S  = 12        # seconds player has to click after correct answer
 SEARCH_STEP_MS = 40      # A* animation speed
 
