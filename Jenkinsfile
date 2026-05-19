@@ -87,6 +87,17 @@ pipeline {
         }
       }
     }
+
+
+    stage('Stage V: QualityGates') {
+      steps {
+        echo "Checking SonarQube Quality Gate..."
+        timeout(time: 2, unit: 'MINUTES') {
+          // This tells Jenkins to pause and wait for the webhook from SonarQube
+          waitForQualityGate abortPipeline: true
+        }
+      }
+    }
   }
 }
   
@@ -96,14 +107,7 @@ pipeline {
 
  
 
-//     stage('Stage V: QualityGates') {
-//       steps {
-//         echo "Checking SonarQube Quality Gate..."
-//         timeout(time: 2, unit: 'MINUTES') {
-//           waitForQualityGate abortPipeline: true
-//         }
-//       }
-//     }
+ 
   
 
 
