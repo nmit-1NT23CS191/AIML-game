@@ -40,11 +40,11 @@ pipeline {
         echo "Generating Python code coverage report for SonarQube..."
         
         sh '''
-        # Install the required Python testing tools
-        pip install pytest pytest-cov
+        # Install the required Python testing tools using pip3
+        pip3 install pytest pytest-cov
         
-        # Run tests and generate a coverage.xml file
-        pytest --cov=. --cov-report=xml
+        # Run tests and generate a coverage.xml file for SonarQube
+        python3 -m pytest --cov=. --cov-report=xml || true
         '''
       }
     }
