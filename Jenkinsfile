@@ -1,5 +1,5 @@
 pipeline {
-  agent {label 'test-node'}
+  agent {label 'salve123'}
 
   environment {
     registry = "firstcicd"
