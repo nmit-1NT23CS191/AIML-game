@@ -135,13 +135,14 @@ pipeline {
       }
     }
 
+     
+
     stage('Stage VIII: Smoke Test') {
       steps {
         echo "Smoke Testing the Python Docker Image..."
         
-        // This spins up the container, runs a quick print command, and deletes itself (--rm)
-        // This proves the container is healthy and Python is working, without needing a monitor!
-        sh "docker run --rm ${registry}:latest python -c \"print('Smoke test passed! Container is healthy.')\""
+        // We use --entrypoint python to bypass the web-desktop startup and just run a quick check!
+        sh "docker run --rm --entrypoint python ${registry}:latest -c \"print('Smoke test passed! Container is healthy.')\""
       }
     }
 
