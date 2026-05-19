@@ -21,8 +21,13 @@ pipeline {
         echo "Building static site assets ..."
 
         sh '''
+        # Print all files in the directory to the Jenkins log for debugging
+        ls -la
+        
+        # Test if the files exist
         test -f index.html
-        test -f ai_arithmatic_maze_race_2.py
+        
+        test -f ai_arithmetic_maze_race_2.py
         '''
       }
     }
