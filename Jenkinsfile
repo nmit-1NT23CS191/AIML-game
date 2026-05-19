@@ -98,41 +98,33 @@ pipeline {
         }
       }
     }
+
+
+    stage('Stage VI: Build & Push Docker Image') {
+      steps {
+        echo "Building and Pushing Docker Image to Docker Hub..."
+        script {
+          // Log into Docker Hub using the credentials you saved
+          docker.withRegistry('', registryCredential) {
+            
+            // Build the image and tag it with the Jenkins Build Number
+            def myImage = docker.build("${registry}:${env.BUILD_NUMBER}")
+            
+            // Push the versioned tag
+            myImage.push()
+            
+            // Also push the 'latest' tag
+            myImage.push('latest')
+          }
+        }
+      }
+    }
   }
 }
   
 
  
-  
 
- 
-
- 
-  
-
-
-//     stage('Stage V: QualityGates') {
-//       steps {
-//         echo "Checking SonarQube Quality Gate..."
-//         timeout(time: 2, unit: 'MINUTES') {
-//           waitForQualityGate()
-//         }
-//       }
-//     }
-//   }
-// }
-
-//     stage('Stage VI: Build Image') {
-//       steps {
-//         echo "Build Docker Image"
-//         script {
-//           docker.withRegistry('', registryCredential) {
-//             myImage = docker.build registry
-//             myImage.push()
-//           }
-//         }
-//       }
-//     }
 
 //     stage('Stage VII: Scan Image ') {
 //       steps {
@@ -150,5 +142,7 @@ pipeline {
 //         sh "docker rm --force smokerun"
 //       }
 //     }
+
+    
 //   }
 // }
