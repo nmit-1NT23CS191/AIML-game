@@ -35,9 +35,17 @@ pipeline {
   
   
 
-    stage('Stage II: Code Coverage ') {
+    stage('Stage II: Code Coverage') {
       steps {
-        echo "Code coverage is not applicable for this static HTML/CSS/JS project."
+        echo "Generating Python code coverage report for SonarQube..."
+        
+        sh '''
+        # Install the required Python testing tools
+        pip install pytest pytest-cov
+        
+        # Run tests and generate a coverage.xml file
+        pytest --cov=. --cov-report=xml
+        '''
       }
     }
   }
