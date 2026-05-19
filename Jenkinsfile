@@ -32,15 +32,16 @@ pipeline {
       }
     }
 
-  }
-}
+  
   
 
-//     stage('Stage II: Code Coverage ') {
-//       steps {
-//         echo "Code coverage is not applicable for this static HTML/CSS/JS project."
-//       }
-//     }
+    stage('Stage II: Code Coverage ') {
+      steps {
+        echo "Code coverage is not applicable for this static HTML/CSS/JS project."
+      }
+    }
+  }
+}
   
 
 //     stage('Stage III: SCA') {
