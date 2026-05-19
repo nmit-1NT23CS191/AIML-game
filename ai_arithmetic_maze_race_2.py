@@ -1,5 +1,5 @@
 """
-AI Arithmetic Maze Race — A* 
+AI Arithmetic Maze Race — A* (Click-to-Move Edition)
 =====================================================
 RULES
 -----
@@ -26,13 +26,13 @@ from typing import List, Tuple, Dict, Optional, Set, Generator
 
 # ── Config ────────────────────────────────────────────────────────────────────
 GRID_ROWS    = 7
-GRID_COLS    = 7
+GRID_COLS    = 9
 CELL_SIZE    = 76
 MOVE_TIME_S  = 12        # seconds player has to click after correct answer
 SEARCH_STEP_MS = 40      # A* animation speed
 
 START = (0, 0)
-GOAL  = (6, 4)
+GOAL  = (6, 8)
 WALL_PROB = 0.22
 
 Cell = Tuple[int, int]
@@ -47,7 +47,7 @@ def manhattan(a: Cell, b: Cell) -> int:
 class MazeRace:
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.root.title("AI Arithmetic Challenge Game")
+        self.root.title("AI Arithmetic Maze Race — A*")
         self.root.resizable(False, False)
 
         # ── game state ──
@@ -72,9 +72,6 @@ class MazeRace:
 
         # ── A* ──
         self.ai_path: List[Cell] = []
-        self.ai_trail: List[Cell] = []
-        self.player_trail: List[Cell] = []
-        self.ai_preview_path: List[Cell] = []
         self.astar_gen: Optional[Generator] = None
         self.astar_running = False
         self._astar_vis: Dict = {}
@@ -184,24 +181,9 @@ class MazeRace:
             if cur and self.maze[cur[0]][cur[1]] == 0:
                 self._fill(cur[0],cur[1],"#70b8ff")
 
-        # Movement trails behind the agents
-        player_trail_set = set(self.player_trail)
-        ai_trail_set = set(self.ai_trail)
-        for (r,c) in player_trail_set | ai_trail_set:
-            if (r,c) == self.ai_pos or (r,c) == self.player_pos or self.maze[r][c] != 0:
-                continue
-            in_player = (r,c) in player_trail_set
-            in_ai = (r,c) in ai_trail_set
-            if in_player and in_ai:
-                self._fill_split(r, c, "#9fd3ff", "#ffd98a")
-            elif in_player:
-                self._fill(r,c,"#9fd3ff")
-            else:
-                self._fill(r,c,"#ffd98a")
-
-        for (r,c) in self.ai_preview_path:
-            if (r,c) != self.ai_pos and (r,c) != self.player_pos and self.maze[r][c] == 0:
-                self._fill(r,c,"#6fa8ff")
+        # AI planned path (orange, behind agents)
+        for (r,c) in self.ai_path[1:]:
+            self._fill(r,c,"#ffd98a")
 
         # GOAL label
         gr,gc = GOAL
@@ -210,13 +192,8 @@ class MazeRace:
             text="GOAL", fill="white", font=("Arial",11,"bold"))
 
         # agents
-        same_cell = self.ai_pos == self.player_pos
-        if same_cell:
-            self._draw_agent(self.ai_pos,     "#C62828", "AI",   dx=-14, dy=0, radius=19)
-            self._draw_agent(self.player_pos, "#1565C0", "YOU",  dx=14,  dy=0, radius=19)
-        else:
-            self._draw_agent(self.ai_pos,     "#C62828", "AI")
-            self._draw_agent(self.player_pos, "#1565C0", "YOU")
+        self._draw_agent(self.ai_pos,     "#C62828", "AI")
+        self._draw_agent(self.player_pos, "#1565C0", "YOU")
 
         # glow ring when player can move
         if self.can_move and not self.game_over:
@@ -234,24 +211,11 @@ class MazeRace:
             (c+1)*CELL_SIZE-p, (r+1)*CELL_SIZE-p,
             fill=color, outline="")
 
-    def _fill_split(self, r, c, left_color, right_color):
-        p = 3
-        x1 = c * CELL_SIZE + p
-        y1 = r * CELL_SIZE + p
-        x2 = (c + 1) * CELL_SIZE - p
-        y2 = (r + 1) * CELL_SIZE - p
-        mid = (x1 + x2) // 2
-        self.canvas.create_rectangle(x1, y1, mid, y2, fill=left_color, outline="")
-        self.canvas.create_rectangle(mid, y1, x2, y2, fill=right_color, outline="")
-        self.canvas.create_rectangle(x1, y1, x2, y2, outline="")
-
-    def _draw_agent(self, pos, fill, label, dx=0, dy=0, radius=None):
+    def _draw_agent(self, pos, fill, label):
         r,c = pos
         cx = c*CELL_SIZE+CELL_SIZE//2
         cy = r*CELL_SIZE+CELL_SIZE//2
-        rad = radius if radius is not None else CELL_SIZE//3
-        cx += dx
-        cy += dy
+        rad = CELL_SIZE//3
         self.canvas.create_oval(cx-rad,cy-rad,cx+rad,cy+rad,
                                 fill=fill, outline="white", width=2)
         self.canvas.create_text(cx,cy,text=label,fill="white",
@@ -294,7 +258,6 @@ class MazeRace:
     def _do_player_move(self, dest: Cell):
         self._cancel_timer()
         self.can_move     = False
-        self.player_trail.append(self.player_pos)
         self.player_pos   = dest
         self.player_moves += 1
         self._draw_timer_bar(0)
@@ -304,7 +267,10 @@ class MazeRace:
             return
 
         # AI takes its ONE step after the player moved
-        self._start_ai_turn()
+        self._ai_take_step()
+
+        if not self.game_over:
+            self._new_question()
 
     # ══════════════════════════════════════════════════════════════════════════
     # QUESTIONS & SUBMIT
@@ -380,48 +346,23 @@ class MazeRace:
         self.can_move = False
         self._draw_timer_bar(0)
         self.status.config(text="⏰ Time's up!  AI moves, new question for you.")
-        # Time expired: AI gets a short preview before its step
-        self._start_ai_turn()
+        # Time expired: AI gets its step, player gets new question
+        self._ai_take_step()
+        if not self.game_over:
+            self._new_question()
 
     # ══════════════════════════════════════════════════════════════════════════
     # AI — one step per player turn
     # ══════════════════════════════════════════════════════════════════════════
-    def _start_ai_turn(self):
-        """Show the AI path briefly, then move one step."""
-        if self.game_over: return
-
-        # Recompute the real move path every turn so the AI always uses the
-        # current shortest route from its current position.
-        self.ai_path = self._astar(self.ai_pos, GOAL)
-
-        self.ai_preview_path = self.ai_path[1:] if len(self.ai_path) > 1 else []
-        self.draw()
-
-        if self._timer_job:
-            try: self.root.after_cancel(self._timer_job)
-            except: pass
-            self._timer_job = None
-
-        self._timer_job = self.root.after(550, self._finish_ai_turn)
-
-    def _finish_ai_turn(self):
-        self.ai_preview_path = []
-        self._timer_job = None
-        self._ai_take_step()
-
-        if not self.game_over:
-            self._new_question()
-
     def _ai_take_step(self):
         """Move the AI exactly ONE step along its A* path."""
         if self.game_over: return
 
-        # Recompute path right before moving so a stale visual animation cannot
-        # affect the actual AI decision.
-        self.ai_path = self._astar(self.ai_pos, GOAL)
+        # Recompute path if stale
+        if not self.ai_path or self.ai_path[0] != self.ai_pos:
+            self.ai_path = self._astar(self.ai_pos, GOAL)
 
         if len(self.ai_path) > 1:
-            self.ai_trail.append(self.ai_pos)
             self.ai_pos  = self.ai_path[1]
             self.ai_moves += 1
             self.ai_path   = self.ai_path[1:]
@@ -473,7 +414,7 @@ class MazeRace:
             if cur == goal:
                 path,node = [],cur
                 while node is not None: path.append(node); node=parent.get(node)
-                return
+                self.ai_path = path[::-1]; return
             closed.add(cur)
             for dr,dc in DIRS:
                 nr,nc = cur[0]+dr,cur[1]+dc
@@ -483,6 +424,7 @@ class MazeRace:
                     if nb not in closed and ng<g.get(nb,10**9):
                         parent[nb]=cur; g[nb]=ng
                         heapq.heappush(heap,(ng+manhattan(nb,goal),ng,nb))
+        self.ai_path = []
 
     def _run_astar_animated(self):
         if self.astar_running: return
@@ -522,8 +464,6 @@ class MazeRace:
                 self.player_pos = START
                 self.ai_pos     = START
                 self.ai_path    = self._astar(START,GOAL)
-                self.ai_trail   = []
-                self.player_trail = []
                 return
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -601,7 +541,6 @@ class MazeRace:
         self.player_score = self.player_moves = self.ai_moves = 0
         self.correct_answers = self.wrong_answers = self.total_attempts = 0
         self.score_lbl.config(text="Score: 0")
-        self.ai_preview_path = []
 
         self.generate_maze()
         self._run_astar_animated()
@@ -612,12 +551,9 @@ class MazeRace:
         self._cancel_timer()
         self.game_over = self.started = self.can_move = False
         self.astar_running = False; self.astar_gen = None; self._astar_vis = {}
-        self.ai_preview_path = []
         self.player_score = self.player_moves = self.ai_moves = 0
         self.correct_answers = self.wrong_answers = self.total_attempts = 0
         self.player_win_time = self.ai_win_time = self.start_time = None
-        self.player_trail = []
-        self.ai_trail = []
         self.score_lbl.config(text="Score: 0")
         self.start_btn.config(state=tk.NORMAL)
         self.submit_btn.config(state=tk.DISABLED)
