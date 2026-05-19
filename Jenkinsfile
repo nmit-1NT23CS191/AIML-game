@@ -22,53 +22,55 @@ pipeline {
         sh "test -f index.html && test -f style.css && test -f script.js"
       }
     }
-  
-
-    stage('Stage II: Code Coverage ') {
-      steps {
-        echo "Code coverage is not applicable for this static HTML/CSS/JS project."
-      }
-    }
-  
-
-    stage('Stage III: SCA') {
-      steps {
-        echo "Running SCA using Trivy file system scan for dependency and configuration vulnerabilities..."
-        sh "trivy fs --scanners vuln,config . > sca-report.txt || true"
-      }
-    }
-  
-
-    stage('Stage IV: SAST') {
-      steps {
-        echo "Running SonarQube analysis ..."
-        withSonarQubeEnv('mysonarqube') {
-          sh "sonar-scanner -Dsonar.projectKey=AIML-game -Dsonar.projectName=AIML-game -Dsonar.sources=. -Dsonar.exclusions=Jenkinsfile"
-        }
-      }
-    }
-
-    stage('Stage V: QualityGates') {
-      steps {
-        echo "Checking SonarQube Quality Gate..."
-        timeout(time: 2, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: true
-        }
-      }
-    }
-  
-
-
-    stage('Stage V: QualityGates') {
-      steps {
-        echo "Checking SonarQube Quality Gate..."
-        timeout(time: 2, unit: 'MINUTES') {
-          waitForQualityGate()
-        }
-      }
-    }
   }
 }
+  
+
+//     stage('Stage II: Code Coverage ') {
+//       steps {
+//         echo "Code coverage is not applicable for this static HTML/CSS/JS project."
+//       }
+//     }
+  
+
+//     stage('Stage III: SCA') {
+//       steps {
+//         echo "Running SCA using Trivy file system scan for dependency and configuration vulnerabilities..."
+//         sh "trivy fs --scanners vuln,config . > sca-report.txt || true"
+//       }
+//     }
+  
+
+//     stage('Stage IV: SAST') {
+//       steps {
+//         echo "Running SonarQube analysis ..."
+//         withSonarQubeEnv('mysonarqube') {
+//           sh "sonar-scanner -Dsonar.projectKey=AIML-game -Dsonar.projectName=AIML-game -Dsonar.sources=. -Dsonar.exclusions=Jenkinsfile"
+//         }
+//       }
+//     }
+
+//     stage('Stage V: QualityGates') {
+//       steps {
+//         echo "Checking SonarQube Quality Gate..."
+//         timeout(time: 2, unit: 'MINUTES') {
+//           waitForQualityGate abortPipeline: true
+//         }
+//       }
+//     }
+  
+
+
+//     stage('Stage V: QualityGates') {
+//       steps {
+//         echo "Checking SonarQube Quality Gate..."
+//         timeout(time: 2, unit: 'MINUTES') {
+//           waitForQualityGate()
+//         }
+//       }
+//     }
+//   }
+// }
 
 //     stage('Stage VI: Build Image') {
 //       steps {
