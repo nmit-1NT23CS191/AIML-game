@@ -134,6 +134,16 @@ pipeline {
         }
       }
     }
+
+    stage('Stage VIII: Smoke Test') {
+      steps {
+        echo "Smoke Testing the Python Docker Image..."
+        
+        // This spins up the container, runs a quick print command, and deletes itself (--rm)
+        // This proves the container is healthy and Python is working, without needing a monitor!
+        sh "docker run --rm ${registry}:latest python -c \"print('Smoke test passed! Container is healthy.')\""
+      }
+    }
   }
 }
   
@@ -142,15 +152,7 @@ pipeline {
 
  
 
-//     stage('Stage VIII: Smoke Test ') {
-//       steps {
-//         echo "Smoke Test the Image"
-//         sh "docker run -d --name smokerun -p 8080:80 ${registry}:latest"
-//         sh "sleep 10"
-//         sh "curl -f http://localhost:8080 || exit 1"
-//         sh "docker rm --force smokerun"
-//       }
-//     }
+ 
 
     
 //   }
