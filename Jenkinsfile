@@ -144,6 +144,10 @@ pipeline {
         sh "docker run --rm ${registry}:latest python -c \"print('Smoke test passed! Container is healthy.')\""
       }
     }
+
+    stage('stage IX: Deploy)'){
+      
+    }
   }
 }
   
