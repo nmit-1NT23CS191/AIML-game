@@ -2,7 +2,7 @@ pipeline {
   agent { label 'docker-agent' }
 
   environment {
-    registry = "firstcicd"
+    registry = "ravikiran1nt23cs191/aiml-game"
     registryCredential = 'dockerhub'
   }
 
