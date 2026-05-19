@@ -119,19 +119,28 @@ pipeline {
         }
       }
     }
+
+    stage('Stage VII: Scan Image') {
+      steps {
+        echo "Scanning Docker Image for Vulnerabilities using Trivy..."
+        
+        // Scan the image and output to a text file
+        sh "trivy image --scanners vuln ${registry}:latest > trivyimage-report.txt || true"
+      }
+      post {
+        always {
+          // Saves the scan report to your Jenkins UI for you to download
+          archiveArtifacts artifacts: 'trivyimage-report.txt', allowEmptyArchive: true
+        }
+      }
+    }
   }
 }
   
 
  
 
-
-//     stage('Stage VII: Scan Image ') {
-//       steps {
-//         echo "Scanning Image for Vulnerabilities"
-//         sh "trivy image --scanners vuln ${registry}:latest > trivyresults.txt"
-//       }
-//     }
+ 
 
 //     stage('Stage VIII: Smoke Test ') {
 //       steps {
