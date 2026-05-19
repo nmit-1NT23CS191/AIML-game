@@ -1,27 +1,32 @@
 pipeline {
-  agent {label 'salve123'}
+  agent { label 'docker-agent' }
 
   environment {
     registry = "firstcicd"
     registryCredential = 'dockerhub'
   }
 
-
   stages {
+
     stage('Checkout') {
       steps {
-         git branch: 'main', changelog: false, credentialsId: 'github', poll: false, url: 'https://github.com/nmit-1NT23CS191/AIML-game.git'
+        git branch: 'main',
+        credentialsId: 'github',
+        url: 'https://github.com/nmit-1NT23CS191/AIML-game.git'
       }
     }
-  
-
 
     stage('Stage I: Build') {
       steps {
         echo "Building static site assets ..."
-        sh "test -f index.html && test -f  ai_arithmatic_maze_race_2.py && test -"
+
+        sh '''
+        test -f index.html
+        test -f ai_arithmatic_maze_race_2.py
+        '''
       }
     }
+
   }
 }
   
