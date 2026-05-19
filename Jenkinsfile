@@ -19,7 +19,7 @@ pipeline {
     stage('Stage I: Build') {
       steps {
         echo "Building static site assets ..."
-        sh "test -f index.html && test -f style.css && test -f script.js"
+        sh "test -f index.html && test -f  ai_arithmatic_maze_race_2.py && test -"
       }
     }
   }
