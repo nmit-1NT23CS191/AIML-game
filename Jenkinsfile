@@ -70,26 +70,31 @@ pipeline {
         }
       }
     }
+
+    stage('Stage IV: SAST (SonarQube)') {
+      steps {
+        echo "Running SonarQube analysis ..."
+        
+        withSonarQubeEnv('mysonarqube') {
+          sh '''
+          sonar-scanner \
+            -Dsonar.projectKey=AIML-game \
+            -Dsonar.projectName=AIML-game \
+            -Dsonar.sources=. \
+            -Dsonar.exclusions=Jenkinsfile,myenv/** \
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+          '''
+        }
+      }
+    }
   }
 }
   
 
-//     stage('Stage III: SCA') {
-//       steps {
-//         echo "Running SCA using Trivy file system scan for dependency and configuration vulnerabilities..."
-//         sh "trivy fs --scanners vuln,config . > sca-report.txt || true"
-//       }
-//     }
+ 
   
 
-//     stage('Stage IV: SAST') {
-//       steps {
-//         echo "Running SonarQube analysis ..."
-//         withSonarQubeEnv('mysonarqube') {
-//           sh "sonar-scanner -Dsonar.projectKey=AIML-game -Dsonar.projectName=AIML-game -Dsonar.sources=. -Dsonar.exclusions=Jenkinsfile"
-//         }
-//       }
-//     }
+ 
 
 //     stage('Stage V: QualityGates') {
 //       steps {
