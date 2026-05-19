@@ -202,9 +202,26 @@ class MazeRace:
             if cur and self.maze[cur[0]][cur[1]] == 0:
                 self._fill(cur[0],cur[1],"#70b8ff")
 
-        # AI planned path (orange, behind agents)
-        for (r,c) in self.ai_path[1:]:
-            self._fill(r,c,"#ffd98a")
+        # Movement trails (history) for both players
+        player_trail_set = set(self.player_trail)
+        ai_trail_set = set(self.ai_trail)
+        for (r,c) in player_trail_set | ai_trail_set:
+            if (r,c) == self.ai_pos or (r,c) == self.player_pos or self.maze[r][c] != 0:
+                continue
+            in_player = (r,c) in player_trail_set
+            in_ai = (r,c) in ai_trail_set
+            if in_player and in_ai:
+                self._fill_split(r, c, "#9fd3ff", "#ffd98a")
+            elif in_player:
+                self._fill(r,c,"#9fd3ff")
+            else:
+                self._fill(r,c,"#ffd98a")
+
+        # AI shortest path (A* planned route - light blue) - only show during search
+        if self.astar_running:
+            for (r,c) in self.ai_path[1:]:
+                if (r,c) != self.ai_pos and (r,c) != self.player_pos and self.maze[r][c] == 0:
+                    self._fill(r,c,"#c8e6f0")
 
         # GOAL label
         gr,gc = GOAL
@@ -213,8 +230,13 @@ class MazeRace:
             text="GOAL", fill="white", font=("Arial",11,"bold"))
 
         # agents
-        self._draw_agent(self.ai_pos,     "#C62828", "AI")
-        self._draw_agent(self.player_pos, "#1565C0", "YOU")
+        same_cell = self.ai_pos == self.player_pos
+        if same_cell:
+            self._draw_agent(self.ai_pos,     "#C62828", "AI",   dx=-14, dy=0, radius=19)
+            self._draw_agent(self.player_pos, "#1565C0", "YOU",  dx=14,  dy=0, radius=19)
+        else:
+            self._draw_agent(self.ai_pos,     "#C62828", "AI")
+            self._draw_agent(self.player_pos, "#1565C0", "YOU")
 
         # glow ring when player can move
         if self.can_move and not self.game_over:
@@ -232,11 +254,24 @@ class MazeRace:
             (c+1)*CELL_SIZE-p, (r+1)*CELL_SIZE-p,
             fill=color, outline="")
 
-    def _draw_agent(self, pos, fill, label):
+    def _fill_split(self, r, c, left_color, right_color):
+        p = 3
+        x1 = c * CELL_SIZE + p
+        y1 = r * CELL_SIZE + p
+        x2 = (c + 1) * CELL_SIZE - p
+        y2 = (r + 1) * CELL_SIZE - p
+        mid = (x1 + x2) // 2
+        self.canvas.create_rectangle(x1, y1, mid, y2, fill=left_color, outline="")
+        self.canvas.create_rectangle(mid, y1, x2, y2, fill=right_color, outline="")
+        self.canvas.create_rectangle(x1, y1, x2, y2, outline="")
+
+    def _draw_agent(self, pos, fill, label, dx=0, dy=0, radius=None):
         r,c = pos
         cx = c*CELL_SIZE+CELL_SIZE//2
         cy = r*CELL_SIZE+CELL_SIZE//2
-        rad = CELL_SIZE//3
+        rad = radius if radius is not None else CELL_SIZE//3
+        cx += dx
+        cy += dy
         self.canvas.create_oval(cx-rad,cy-rad,cx+rad,cy+rad,
                                 fill=fill, outline="white", width=2)
         self.canvas.create_text(cx,cy,text=label,fill="white",
@@ -279,6 +314,7 @@ class MazeRace:
     def _do_player_move(self, dest: Cell):
         self._cancel_timer()
         self.can_move     = False
+        self.player_trail.append(self.player_pos)
         self.player_pos   = dest
         self.player_moves += 1
         self._draw_timer_bar(0)
@@ -384,6 +420,7 @@ class MazeRace:
             self.ai_path = self._astar(self.ai_pos, GOAL)
 
         if len(self.ai_path) > 1:
+            self.ai_trail.append(self.ai_pos)
             self.ai_pos  = self.ai_path[1]
             self.ai_moves += 1
             self.ai_path   = self.ai_path[1:]
@@ -485,6 +522,8 @@ class MazeRace:
                 self.player_pos = START
                 self.ai_pos     = START
                 self.ai_path    = self._astar(START,GOAL)
+                self.ai_trail   = []
+                self.player_trail = []
                 return
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -575,6 +614,8 @@ class MazeRace:
         self.player_score = self.player_moves = self.ai_moves = 0
         self.correct_answers = self.wrong_answers = self.total_attempts = 0
         self.player_win_time = self.ai_win_time = self.start_time = None
+        self.player_trail = []
+        self.ai_trail = []
         self.score_lbl.config(text="Score: 0")
         self.start_btn.config(state=tk.NORMAL)
         self.submit_btn.config(state=tk.DISABLED)
